@@ -1,5 +1,5 @@
 import * as ramda from 'ramda';
-import { expect, assert } from 'chai';
+import { assert } from 'chai';
 import 'mocha';
 
 //Flatmap 
@@ -25,68 +25,74 @@ assert.deepEqual(flatmap(undefined, [1, 2, 3, 4, 5, 6, 7, 8]), [], "test3-undifi
 
 //movieList
 interface movie {
-    name: string,
-    videoList: Array<video>
+    name: string;
+    videos: Array<video>;
 };
 
-interface video {
+interface video{
     id: number;
     title: string;
     boxarts: Array<boxart>;
 };
 
-interface return_video {
-    id: number,
-    title: string,
-    boxarts: string
+interface return_video{
+    id: number;
+    title: string;
+    boxarts: string;
 };
 
 interface boxart {
-    width: number,
-    height: number,
-    url: string,
+    width: number;
+    height: number;
+    url: string;
 };
 
-const box_check_demision: (box: boxart) => boolean = function(box: boxart): boolean{
+
+
+const box_check_demision: (box: boxart) => boolean = function (box: boxart): boolean {
     return (box.height === 200 && box.width === 150);
-}
+};
+
 
 const extractVideoList: (movieList: Array<movie>) => Array<movie> = function (movieList: Array<movie>): Array<movie> {
     return flatmap((x) => x.video, movieList);
 }
 
-const video_filter: (video: video) => return_video = function (video: video): return_video {
-    let boxarts: boxart = ramda.filter(box_check_demision, video.boxarts).pop();
-    let outPut: return_video = {
+
+const video_filter: (video: video) => return_video = function(video: video): return_video {
+    let boxart: boxart = ramda.filter(box_check_demision, video.boxarts).pop();
+    if(boxart!=undefined)
+    return {
         id: video.id,
         title: video.title,
-        boxarts: boxarts.url
+        boxarts: boxart.url
     };
-    return outPut;
+    return{ 
+        id: video.id,
+        title: video.title,
+        boxarts: ""
+    };
 };
 
-const getBoxArts: (movielist: Array<movie>) => Array<return_video> = function (movielist: Array<movie>): Array<return_video> {
-    let video_list: Array<video> = flatmap((x) => x.video, movielist);
-    let outPut:Array<return_video>= ramda.map(video_filter, video_list);
-    return outPut;
+const getBoxarts: (movielist: Array<movie>) => Array<return_video> = function(movielist: Array<movie>): Array<return_video> {
+    let curr_list: Array<video> = flatmap((x)=>x.videos, movielist);
+    let new_list: Array<return_video> = ramda.map(video_filter, curr_list);
+    return new_list;
 };
 
 
-//test 1
-
+//test 1-regular test
 let movielist1: Array<movie> = [
     {
         name: "Instant Queue",
-        videoList: [
+        videos : [
             {
-                id: 70111470,
-                title: "Die Hard",
-                boxarts: [
+                "id": 70111470,
+                "title": "Die Hard",
+                "boxarts": [
                     { width: 150, height: 200, url: "http://cdn-0.nflximg.com/images/2891/DieHard150.jpg" },
                     { width: 200, height: 200, url: "http://cdn-0.nflximg.com/images/2891/DieHard200.jpg" }
                 ],
-                // "url": "http://api.netflix.com/catalog/titles/movies/70111470",
-                // "rating": 4.0,
             },
             {
                 "id": 654356453,
@@ -96,14 +102,12 @@ let movielist1: Array<movie> = [
                     { width: 150, height: 200, url: "http://cdn-0.nflximg.com/images/2891/BadBoys150.jpg" }
 
                 ],
-                // "url": "http://api.netflix.com/catalog/titles/movies/70111470",
-                // "rating": 5.0,
             }
         ]
     },
     {
         name: "New Releases",
-        videoList: [
+        videos: [
             {
                 "id": 65432445,
                 "title": "The Chamber",
@@ -111,8 +115,6 @@ let movielist1: Array<movie> = [
                     { width: 150, height: 200, url: "http://cdn-0.nflximg.com/images/2891/TheChamber150.jpg" },
                     { width: 200, height: 200, url: "http://cdn-0.nflximg.com/images/2891/TheChamber200.jpg" }
                 ],
-                // "url": "http://api.netflix.com/catalog/titles/movies/70111470",
-                // "rating": 4.0,
             },
             {
                 "id": 675465,
@@ -122,33 +124,52 @@ let movielist1: Array<movie> = [
                     { width: 150, height: 200, url: "http://cdn-0.nflximg.com/images/2891/Fracture150.jpg" },
                     { width: 300, height: 200, url: "http://cdn-0.nflximg.com/images/2891/Fracture300.jpg" }
                 ],
-                // "url": "http://api.netflix.com/catalog/titles/movies/70111470",
-                // "rating": 5.0,
             }
         ]
     }
 ];
-
-let movielist1_res: Array<return_video> = [{
-    id: 70111470,
+let movielist1_res: Array<return_video> = [ { id: 70111470,
     title: 'Die Hard',
-    boxarts: 'http://cdn-0.nflximg.com/images/2891/DieHard150.jpg'
-},
-{
-    id: 654356453,
+    boxarts: 'http://cdn-0.nflximg.com/images/2891/DieHard150.jpg' },
+  { id: 654356453,
     title: 'Bad Boys',
-    boxarts: 'http://cdn-0.nflximg.com/images/2891/BadBoys150.jpg'
-},
-{
-    id: 65432445,
+    boxarts: 'http://cdn-0.nflximg.com/images/2891/BadBoys150.jpg' },
+  { id: 65432445,
     title: 'The Chamber',
-    boxarts: 'http://cdn-0.nflximg.com/images/2891/TheChamber150.jpg'
-},
-{
-    id: 675465,
+    boxarts: 'http://cdn-0.nflximg.com/images/2891/TheChamber150.jpg' },
+  { id: 675465,
     title: 'Fracture',
-    boxarts: 'http://cdn-0.nflximg.com/images/2891/Fracture150.jpg'
-}];
+    boxarts: 'http://cdn-0.nflximg.com/images/2891/Fracture150.jpg' } ];
+
+    assert.deepEqual(getBoxarts(movielist1), movielist1_res,"faild test1 of get boxarts!");
 
 
-assert.deepEqual(getBoxArts(movielist1), movielist1_res, "faild test1 of get boxarts!");
+
+//test2 -empty boxart
+let movielist2: Array<movie> = [
+    {
+        name: "Instant Queue",
+        videos : [
+            {
+                "id": 70111470,
+                "title": "Die Hard",
+                "boxarts": [],
+
+                
+            }
+        ]
+    }
+    
+];
+let movielist2_res: Array<return_video> = [ { id: 70111470,
+    title: 'Die Hard',
+    boxarts: '' }];
+
+assert.deepEqual(getBoxarts(movielist2),movielist2_res,"faild test2 of get boxarts!");
+
+//test3- empty movielist
+let movielist3: Array<movie> = [];
+
+let movielist3_res: Array<return_video> = [];
+
+assert.deepEqual(getBoxarts(movielist3),movielist3_res,"faild test3 of get boxarts!");
